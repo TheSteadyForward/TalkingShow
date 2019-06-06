@@ -21,3 +21,17 @@ class Config(object):
     SESSION_PERMANENT = False
     # 设置session保存时间
     PERMANENT_SESSION_LIFETIME = 86400 * 2
+
+
+class DevelopConfig(Config):
+    DEBUG = True
+
+
+class ProductionConfig(Config):
+    DEBUG = False
+
+
+class TestConfig(Config):
+    DEBUG = True
+
+
