@@ -7,17 +7,13 @@
 6、集成falsk_script   pip install falsk_script
 7、集成flask_migrate  pip install falsk_migrate
 """
-from flask import Flask,session
-from flask_sqlalchemy import SQLAlchemy
-from redis import StrictRedis
-from flask_wtf import CSRFProtect
-from flask_session import Session
+
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
-from config import Config
-from info import app,db
+from info import set_config,db
 
 
+app = set_config("develop")
 # 6、集成falsk_manager
 manager = Manager(app)
 # 7、集成flask_migrate

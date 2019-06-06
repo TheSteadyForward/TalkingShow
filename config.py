@@ -35,3 +35,8 @@ class TestConfig(Config):
     DEBUG = True
 
 
+config = {
+    "develop":DevelopConfig,
+    "production":ProductionConfig,
+    "test":TestConfig
+}
