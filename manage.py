@@ -15,11 +15,11 @@ from flask_session import Session
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 
-app = Flask(__name__)
+
 # 1、集成配置类
 class Config(object):
+    SECRET_KEY = "1234567890"
     DEBUG = True
-    SERETC_KEY = "erytweguifhu"
 
     SQLALCHEMY_DATABASE_URI = "mysql://root:mysql@127.0.0.1:3306/TalkingShow"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -27,18 +27,24 @@ class Config(object):
     REDIS_HOST = "127.0.0.1"
     REDIS_PORT = 6379
 
+    # 指定储存数据库
     SESSION_TYPE = "redis"
-    SESSION_KEY_PREFIX = StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
+    # 指定储存session对象
+    SESSION_REDIS = StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
+    # 是否设置session　加密
     SESSION_USE_SIGNER = True
+    #　设置session不是永久保存
     SESSION_PERMANENT = False
+    # 设置session保存时间
     PERMANENT_SESSION_LIFETIME = 86400 * 2
 
+app = Flask(__name__)
 
 app.config.from_object(Config)
 # ２、集成sqlalchemy
 db = SQLAlchemy(app)
 # ３、集成redis
-redis_sroce = StrictRedis(host=Config.REDIS_HOST, port=Config.REDIS_PORT)
+redis_srore = StrictRedis(host=Config.REDIS_HOST, port=Config.REDIS_PORT)
 # ４、集成CSRFProtect
 CSRFProtect(app)
 # 5、集成flask_session
@@ -51,14 +57,10 @@ Migrate(app, db)
 manager.add_command("db", MigrateCommand)
 
 
-
-
-
-
 @app.route("/")
 def index():
-    # redis_sroce.set("name", "laoli")
-    session["name"] = "laoli"
+    # redis_sroce.set("name", "小花")
+    session["age"] = "小花"
     return "index"
 
 
