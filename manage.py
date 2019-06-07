@@ -7,7 +7,7 @@
 6、集成falsk_script   pip install falsk_script
 7、集成flask_migrate  pip install falsk_migrate
 """
-
+import logging
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from info import set_config,db
@@ -23,8 +23,11 @@ manager.add_command("db", MigrateCommand)
 
 @app.route("/")
 def index():
-    # redis_sroce.set("name", "小花")
-    # session["age"] = "小花"
+    logging.debug("debug")
+    logging.info("info")
+    logging.warning("waring")
+    logging.error("error")
+    logging.fatal("fatal")
     return "hello word"
 
 
