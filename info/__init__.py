@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from redis import StrictRedis
 from flask_wtf import CSRFProtect
 from flask_session import Session
-from info.modules.index import index_blu
+
 
 
 def set_logging(config_name):
@@ -24,6 +24,8 @@ def set_logging(config_name):
 
 
 db = SQLAlchemy()
+# 为了能让redis_store正常使用，先定义一个全局变量，然后在函数中进行全局变量修改声明
+redis_store = None # type:StrictRedis
 
 def set_config(config_name):
     set_logging(config_name)
@@ -33,14 +35,16 @@ def set_config(config_name):
     # ２、集成sqlalchemy
     db.init_app(app)
     # ３、集成redis
-    redis_srore = StrictRedis(host=config[config_name].REDIS_HOST, port=config[config_name].REDIS_PORT)
+    global redis_store
+    redis_store = StrictRedis(host=config[config_name].REDIS_HOST, port=config[config_name].REDIS_PORT)
     # ４、集成CSRFProtect
     CSRFProtect(app)
     # 5、集成flask_session
     # 说明：flask中Session是用户保存用户数据的容器（上下文），而flask_session是指定session指定保存路径
     Session(app)
 
-
+    # 为避免循环导入，注册蓝图，随时使用随时调用
+    from info.modules.index import index_blu
     app.register_blueprint(index_blu)
 
     return app
