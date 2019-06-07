@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from redis import StrictRedis
 from flask_wtf import CSRFProtect
 from flask_session import Session
+from info.modules.index import index_blu
 
 
 def set_logging(config_name):
@@ -38,5 +39,8 @@ def set_config(config_name):
     # 5、集成flask_session
     # 说明：flask中Session是用户保存用户数据的容器（上下文），而flask_session是指定session指定保存路径
     Session(app)
+
+
+    app.register_blueprint(index_blu)
 
     return app

@@ -21,15 +21,5 @@ Migrate(app, db)
 manager.add_command("db", MigrateCommand)
 
 
-@app.route("/")
-def index():
-    logging.debug("debug")
-    logging.info("info")
-    logging.warning("waring")
-    logging.error("error")
-    logging.fatal("fatal")
-    return "hello word"
-
-
 if __name__ == '__main__':
     manager.run()
