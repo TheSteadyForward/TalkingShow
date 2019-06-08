@@ -46,5 +46,7 @@ def set_config(config_name):
     # 为避免循环导入，注册蓝图，随时使用随时调用
     from info.modules.index import index_blu
     app.register_blueprint(index_blu)
+    from info.modules.passport import passport_blu
+    app.register_blueprint(passport_blu)
 
     return app
