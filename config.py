@@ -1,5 +1,4 @@
 import logging
-
 from redis import StrictRedis
 
 
