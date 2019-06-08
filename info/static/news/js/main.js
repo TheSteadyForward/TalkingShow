@@ -177,6 +177,7 @@ function sendSMSCode() {
     }
 
     // TODO 发送短信验证码
+
 }
 
 // 调用该函数模拟点击左侧按钮
