@@ -1,13 +1,73 @@
 import random
 import re
-from info import constants
-from flask import request, abort, current_app, make_response, jsonify
+from info import constants, db
+from flask import request, abort, current_app, make_response, jsonify, session
 import json
 from info import redis_store
+from info.models import User
 from . import passport_blu
 from info.utils.captcha.captcha import captcha
 from info.utils.response_code import *
 from info.libs.yuntongxun.sms import CCP
+
+@passport_blu.route("/register")
+def refister():
+    """
+    1、获取mobile  smscode  password
+    2、整体进行校验
+    3、mobile 正则
+    4、smscode  进行验证
+    5、初始化User对象
+    6、核心添加数据库信息
+    7、session保持状态
+    8、响应前端
+    :return:
+    """
+    dict_data = request.json
+
+    mobile = dict_data.get("mobile")
+    smscode = dict_data.get("smscode")
+    password = dict_data.get("password")
+
+    # 1.整体校验
+    if not all([mobile, smscode, password]):
+        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+
+    # 2.mobile手机号 正则校验
+    if not re.match(r"1[3456789]\d{9}", mobile):
+        return jsonify(errno=RET.DATAERR, errmsg="手机号输入错误")
+    try:
+        redis_sms = redis_store.get(mobile)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据库查询失败")
+
+    # 3.判断数据查询是否存
+    if not redis_sms:
+        return jsonify(errno=RET.NODATA, errmsg="短信验证码已经过期")
+
+    # 4.短信验证码进行校验
+    if redis_sms != smscode:
+        return jsonify(errno=RET.DATAERR,errmsg="用户输入短信验证码错误")
+
+    # 5.初始化User对象，将用户信息添加数据库
+    user = User()
+    user.nick_name = mobile
+    user.password = password
+    user.mobile = mobile
+    try:
+        db.session.add(user)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DATAERR, errmsg="数据保存失败")
+
+    # 6.session保持状态
+    session["user_id"] = user.id
+
+    # 7.返回前端响应
+    return jsonify(errno=RET.OK, errmsg="注册成功")
 
 
 @passport_blu.route("/sms_code", methods=["POST"])
