@@ -33,19 +33,27 @@ $(function(){
 
 
 	// 点击输入框，提示文字上移
-	$('.form_group').on('click focusin',function(){
-		$(this).children('.input_tip').animate({'top':-5,'font-size':12},'fast').siblings('input').focus().parent().addClass('hotline');
-	})
+	// $('.form_group').on('click focusin',function(){
+	// 	$(this).children('.input_tip').animate({'top':-5,'font-size':12},'fast').siblings('input').focus().parent().addClass('hotline');
+	// })
+    //
+	// // 输入框失去焦点，如果输入框为空，则提示文字下移
+	// $('.form_group input').on('blur focusout',function(){
+	// 	$(this).parent().removeClass('hotline');
+	// 	var val = $(this).val();
+	// 	if(val=='')
+	// 	{
+	// 		$(this).siblings('.input_tip').animate({'top':22,'font-size':14},'fast');
+	// 	}
+	// })
+    $('.form_group').on('click',function(){
+    $(this).children('input').focus()
+    })
 
-	// 输入框失去焦点，如果输入框为空，则提示文字下移
-	$('.form_group input').on('blur focusout',function(){
-		$(this).parent().removeClass('hotline');
-		var val = $(this).val();
-		if(val=='')
-		{
-			$(this).siblings('.input_tip').animate({'top':22,'font-size':14},'fast');
-		}
-	})
+    $('.form_group input').on('focusin',function(){
+        $(this).siblings('.input_tip').animate({'top':-5,'font-size':12},'fast')
+        $(this).parent().addClass('hotline');
+    })
 
 
 	// 打开注册框
@@ -177,6 +185,45 @@ function sendSMSCode() {
     }
 
     // TODO 发送短信验证码
+    var params = {
+        "mobile":mobile,  // 手机号
+        "image_code":imageCode,  // 用户输入图片的验证码
+        "image_code_id":imageCodeId  // 真实图片验证码图片编号
+    }
+    $.ajax({
+        url:"/passport/sms_code",
+        type:"post",
+        contentType:"application/json",
+        data:JSON.stringify(params),
+        success:function (response) {
+            if (response.errno == "0"){
+            //    验证成功
+                var num = 60
+                var t = setInterval(function () {
+                    if (num == 1){
+                        //倒计时到时间
+                        //清除计时器
+                        clearInterval(t)
+                        //还原提示信息
+                        $(".get_code").html("点击获取验证码")
+                        //还原点击事件
+                        $(".get_code").attr("onclick", "sendSMSCode();");
+
+                    }else{
+                        num -= 1
+                        $(".get_code").html(num + "秒")
+                    }
+                }, 1000)
+
+            }else{
+            //    验证失败
+                alert(response.errmsg)
+                $("#register-image-code-err").html(response.errmsg)
+                $("#register-image-code-err").show()
+                $(".get_code").attr("onclick", "sendSMSCode();");
+            }
+        }
+    })
 
 }
 

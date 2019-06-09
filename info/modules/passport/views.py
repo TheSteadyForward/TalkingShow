@@ -10,8 +10,10 @@ from info.utils.response_code import *
 from info.libs.yuntongxun.sms import CCP
 
 
-@passport_blu.route()
+@passport_blu.route("/sms_code", methods=["POST"])
 def get_sms_code():
+
+    """点击获得手机验证码"""
     """
     1、获取参数 mobile image_code image_code_id
     2、整体校验
@@ -22,9 +24,9 @@ def get_sms_code():
     7、接收信息是否发送成功
     :return:
     """
-    data_json = request.data.deconde()
-    dict_data = json.loads(data_json)
-
+    # data_json = request.data.deconde()
+    # dict_data = json.loads(data_json)
+    dict_data = request.json
     # 1、获取参数 mobile image_code image_code_id
     mobile = dict_data.get("mobile")
     image_code = dict_data.get("image_code")
@@ -50,12 +52,12 @@ def get_sms_code():
         return jsonify(errno=RET.DATAERR, errmsg="图片验证码填写错误")
 
     sms_code = "%06d" % random.randint(0, 999999)
-    ccp = CCP()
-    result = ccp.send_template_sms(mobile, [sms_code, 5], 1)
-
-    if result != 0:
-        return jsonify(errno=RET.OK, errmsg="短信发送失败")
-
+    # ccp = CCP()
+    # result = ccp.send_template_sms(mobile, [sms_code, 5], 1)
+    #
+    # if result != 0:
+    #     return jsonify(errno=RET.OK, errmsg="短信发送失败")
+    current_app.logger.info("手机验证码是%s" % sms_code)
     try:
         redis_store.setex(mobile, constants.SMS_CODE_REDIS_EXPIRES, sms_code)
     except Exception as e:
@@ -68,6 +70,7 @@ def get_sms_code():
 
 @passport_blu.route("/image_code")
 def get_image_code():
+    """获取图片验证码"""
     """
     1、获取UUid
     2、判断是否存在，如果不在则报错
@@ -84,6 +87,7 @@ def get_image_code():
 
     # 使用工具包生成验证码文本和验证码图片
     _, text, image = captcha.generate_captcha()
+    current_app.logger.info("图片验证码是%s" % text)
 
     try:
         # 将验证码存入redis数据库
