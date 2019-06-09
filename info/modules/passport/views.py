@@ -13,6 +13,16 @@ from werkzeug.security import check_password_hash
 from datetime import datetime
 
 
+@passport_blu.route("/logout")
+def logout():
+    """
+    1.删除session
+    :return:
+    """
+    session.pop("user_id", None)
+    return jsonify(errno=RET.OK, errmsg="删除成功")
+
+
 @passport_blu.route("/login",methods=["POST"])
 def login():
     """登录页面功能"""
