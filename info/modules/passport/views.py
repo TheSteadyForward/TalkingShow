@@ -13,8 +13,9 @@ from werkzeug.security import check_password_hash
 from datetime import datetime
 
 
-@passport_blu.route("/login")
+@passport_blu.route("/login",methods=["POST"])
 def login():
+    """登录页面功能"""
     """
     1.接收参数 mobile  passport
     2.校验参数
@@ -35,6 +36,9 @@ def login():
     if not all([mobile, passport]):
         return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
 
+    if not re.match(r"1[3456789]\d{9}", mobile):
+        return jsonify(errno=RET.DATAERR, errmsg="手机号输入错误")
+
     # 3.1 查询数据库，判断用户是否存在
     try:
         user = User.query.filter_by(mobile=mobile).first()
@@ -45,7 +49,7 @@ def login():
         return jsonify(errno=RET.NODATA, errmsg="用户未注册")
 
     # 4.判断密码是否正确
-    if not check_password_hash(passport):
+    if not user.check_passowrd(passport):
         return jsonify(errno=RET.NODATA, errmsg="密码错误")
 
     # 5.添加登录时间

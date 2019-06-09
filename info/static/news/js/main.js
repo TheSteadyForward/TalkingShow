@@ -118,6 +118,23 @@ $(function(){
         }
 
         // 发起登录请求
+        var params = {
+            "mobile":mobile,
+            "passport":password
+        }
+        $.ajax({
+            url:"/passport/login",
+            type:"post",
+            data:JSON.stringify(params),
+            contentType:"application/json",
+            success:function (reps) {
+                if (reps.errno == "0"){
+                     location.reload()
+                }else{
+                    alert(reps.errmsg)
+                }
+            }
+        })
     })
 
 
