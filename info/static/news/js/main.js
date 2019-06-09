@@ -127,6 +127,12 @@ $(function(){
             type:"post",
             data:JSON.stringify(params),
             contentType:"application/json",
+            headers:{
+            "X-CSRFToken":getCookie("csrf_token")
+            },
+            // headers: {
+            //     "X-CSRFToken": getCookie('csrf_token')
+            //     },
             success:function (reps) {
                 if (reps.errno == "0"){
                      location.reload()
@@ -179,6 +185,12 @@ $(function(){
             type:"post",
             data:JSON.stringify(params),
             contentType:"application/json",
+            headers:{
+            "X-CSRFToken":getCookie("csrf_token")
+            },
+            // headers: {
+            //     "X-CSRFToken": getCookie('csrf_token')
+            //     },
             success:function (resp) {
                 if (resp.errno == "0"){
                     location.reload()
@@ -232,6 +244,12 @@ function sendSMSCode() {
         type:"post",
         contentType:"application/json",
         data:JSON.stringify(params),
+        headers:{
+            "X-CSRFToken":getCookie("csrf_token")
+        },
+        // headers: {
+        //         "X-CSRFToken": getCookie('csrf_token')
+        //         },
         success:function (response) {
             if (response.errno == "0"){
             //    验证成功

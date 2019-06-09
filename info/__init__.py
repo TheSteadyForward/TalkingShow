@@ -4,7 +4,7 @@ from flask import Flask
 from config import config
 from flask_sqlalchemy import SQLAlchemy
 from redis import StrictRedis
-from flask_wtf import CSRFProtect
+from flask_wtf.csrf import CSRFProtect, generate_csrf
 from flask_session import Session
 
 
@@ -38,7 +38,13 @@ def set_config(config_name):
     global redis_store
     redis_store = StrictRedis(host=config[config_name].REDIS_HOST, port=config[config_name].REDIS_PORT, decode_responses=True)
     # ４、集成CSRFProtect
-    # CSRFProtect(app)
+    @app.after_request
+    def akter_request(response):
+        csrf_token = generate_csrf()
+        response.set_cookie("csrf_token", csrf_token)
+        return response
+
+    CSRFProtect(app)
     # 5、集成flask_session
     # 说明：flask中Session是用户保存用户数据的容器（上下文），而flask_session是指定session指定保存路径
     Session(app)
