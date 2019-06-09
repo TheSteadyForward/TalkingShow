@@ -1,14 +1,68 @@
 import random
 import re
+import json
 from info import constants, db
 from flask import request, abort, current_app, make_response, jsonify, session
-import json
 from info import redis_store
 from info.models import User
 from . import passport_blu
 from info.utils.captcha.captcha import captcha
 from info.utils.response_code import *
 from info.libs.yuntongxun.sms import CCP
+from werkzeug.security import check_password_hash
+from datetime import datetime
+
+
+@passport_blu.route("/login")
+def login():
+    """
+    1.接收参数 mobile  passport
+    2.校验参数
+    3.mobile 查询数据库,判断是否存在
+    4.校验 passport
+    5.添加最后登录时间
+    6.session状态保持
+    7.返回前端响应
+    :return:
+    """
+    # 1.接收参数
+    dict_data = request.json
+
+    mobile = dict_data.get("mobile")
+    passport = dict_data.get("passport")
+
+    # 2.校验整体参数
+    if not all([mobile, passport]):
+        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+
+    # 3.1 查询数据库，判断用户是否存在
+    try:
+        user = User.query.filter_by(mobile=mobile).first()
+    except Exception as e:
+        return jsonify(errno=RET.DATAERR, errmsg="数据库查询失败")
+    # 3.2 判断用户是否存在
+    if not user:
+        return jsonify(errno=RET.NODATA, errmsg="用户未注册")
+
+    # 4.判断密码是否正确
+    if not check_password_hash(passport):
+        return jsonify(errno=RET.NODATA, errmsg="密码错误")
+
+    # 5.添加登录时间
+    User.last_login = datetime.now()
+    try:
+        db.session.commit()
+    except Exception as e:
+        current_app.logger.error(e)
+        db.session.rollback()
+        return jsonify(errno=RET.DATAERR, errmsg="数据保存失败")
+
+    # 6.session状态保持
+    session["user_id"] = user.id
+
+    # 7.返回前端响应
+    return jsonify(errno=RET.OK, errmsg="数据保存成功")
+
 
 @passport_blu.route("/register", methods=["POST"])
 def refister():
