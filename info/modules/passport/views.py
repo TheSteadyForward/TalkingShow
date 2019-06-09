@@ -10,8 +10,9 @@ from info.utils.captcha.captcha import captcha
 from info.utils.response_code import *
 from info.libs.yuntongxun.sms import CCP
 
-@passport_blu.route("/register")
+@passport_blu.route("/register", methods=["POST"])
 def refister():
+    """注册提交"""
     """
     1、获取mobile  smscode  password
     2、整体进行校验
