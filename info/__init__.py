@@ -7,6 +7,7 @@ from redis import StrictRedis
 from flask_wtf.csrf import CSRFProtect, generate_csrf
 from flask_session import Session
 
+from info.utils.common import do_index_class
 
 
 def set_logging(config_name):
@@ -48,6 +49,9 @@ def set_config(config_name):
     # 5、集成flask_session
     # 说明：flask中Session是用户保存用户数据的容器（上下文），而flask_session是指定session指定保存路径
     Session(app)
+
+    # 添加过滤器
+    app.add_template_filter(do_index_class, "index_class")
 
     # 为避免循环导入，注册蓝图，随时使用随时调用
     from info.modules.index import index_blu
